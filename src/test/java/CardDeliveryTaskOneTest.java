@@ -1,32 +1,40 @@
-//import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+//import static com.codeborne.selenide.Selenide.$;
+//import static com.codeborne.selenide.Selenide.open;
+import com.codeborne.selenide.Condition;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.Keys;
 
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.open;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import static com.codeborne.selenide.Selenide.*;
+
 
 public class CardDeliveryTaskOneTest {
 
-    private WebDriver driver;
+    //private WebDriver driver;
+    private String generateDate(int addDays, String pattern) {
+        return LocalDate.now().plusDays(addDays).format(DateTimeFormatter.ofPattern(pattern));
+    }
+
+
 
     @Test
     void nameTestOne(){
-        open("http://0.0.0.0:9999");
-        $("[data-test-id='city']").setValue("Москва");
-        $("[data-test-id='data']").setValue("05.11.2023");
-        $("[data-test-id='name']").setValue("Петров-Пётр Петрович");
-        $("[data-test-id='phone']").setValue("+70001234567");
-        $("checkbox__box").click();
-        $("button__text").click();
+        open("http://localhost:9999");
 
-
+        $("[data-test-id='city'] input").setValue("Москва");
+        String planningDate = generateDate(4,"dd.MM.yyyy");
+        $("[data-test-id='date'] input").sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME),Keys.DELETE);
+        $("[data-test-id='date'] input").setValue(planningDate);
+        $("[data-test-id='name'] input").setValue("Петров-Петр Петрович");
+        $("[data-test-id='phone'] input").setValue("+70001234567");
+        $("[data-test-id='agreement']").click();
+        $("button.button").click();
+        $(".notification__content")
+                .shouldBe(Condition.visible, Duration.ofSeconds(15))
+                .shouldHave(Condition.exactText("Встреча успешно забронирована на " + planningDate));
 
     }
 
